@@ -1,61 +1,54 @@
 // =============================================================================
-//  WaveGrain — PluginEditor.h
+//  WaveGrain II — PluginEditor.h
+//  foleys MagicPluginEditor subclass adding:
+//   - the JUCE FileDragAndDropTarget path (Finder + plain Live browser drags)
+//   - the native promise-aware DropOverlay (Ableton browser promise drags)
+//   - a visible whole-editor drop-highlight state
+//  Custom GuiItems (registered via registerWaveGrainItems, all palette-visible):
+//   SampleView (hero waveform + live grain cloud), Sigil (stealth identity +
+//   BETA), SyncKnob (ONE knob swapping ms/beat attachment + chip), ModKnob
+//   (knob + LFO A/B depth rings), SeedPanel, CodecPanel, PresetBar, Status.
 // =============================================================================
 #pragma once
 
 #include <juce_audio_utils/juce_audio_utils.h>
+#include <foleys_gui_magic/foleys_gui_magic.h>
 #include "PluginProcessor.h"
 
-// Sample overview (min/max) + live per-voice playheads + selected region.
-class SampleDisplay : public juce::Component
-{
-public:
-    void setData(std::vector<float> lo, std::vector<float> hi, std::vector<float> heads,
-                 float pos, float scanSpan)
-    { lo_ = std::move(lo); hi_ = std::move(hi); heads_ = std::move(heads); pos_ = pos; span_ = scanSpan; repaint(); }
-    void paint(juce::Graphics&) override;
-private:
-    std::vector<float> lo_, hi_, heads_;
-    float pos_ = 0.0f, span_ = 0.0f;
-};
+#if JUCE_MAC
+ #include "ui/DropOverlay.h"
+#endif
 
-class WaveGrainEditor : public juce::AudioProcessorEditor,
-                        private juce::Timer,
+// Register all WaveGrain II custom GuiItems with the builder.
+void registerWaveGrainItems(foleys::MagicGUIBuilder& builder);
+
+class WaveGrainEditor : public foleys::MagicPluginEditor,
                         public juce::FileDragAndDropTarget
 {
 public:
-    explicit WaveGrainEditor(WaveGrainProcessor&);
-    ~WaveGrainEditor() override = default;
-    void paint(juce::Graphics&) override;
-    void resized() override;
+    WaveGrainEditor(WaveGrainProcessor&, std::unique_ptr<foleys::MagicGUIBuilder> builder);
+    ~WaveGrainEditor() override;
 
+    // ---- JUCE drag-and-drop path ----
     bool isInterestedInFileDrag(const juce::StringArray& files) override;
     void filesDropped(const juce::StringArray& files, int, int) override;
+    void fileDragEnter(const juce::StringArray&, int, int) override;
+    void fileDragExit(const juce::StringArray&) override;
+
+    void paintOverChildren(juce::Graphics&) override;
+    void parentHierarchyChanged() override;
 
 private:
-    void timerCallback() override;
-    void addSlider(const char* id, const juce::String& name, int group);
-    void addChoice(const char* id, const juce::String& name, juce::StringArray items, int group);
-    void addToggle(const char* id, const juce::String& name, int group);
+    void setDragOver(bool b);
 
     WaveGrainProcessor& proc;
-    juce::MidiKeyboardComponent keyboard;
-    juce::Label   title, status;
-    juce::TextButton loadBtn { "Load…" }, panicBtn { "Panic" };
-    SampleDisplay display;
-    std::unique_ptr<juce::FileChooser> chooser;
+    juce::TooltipWindow tips { this, 400 };
+    bool dragOver_ = false;
 
-    struct Ctrl { std::unique_ptr<juce::Component> c; std::unique_ptr<juce::Label> l;
-                  std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sa;
-                  std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> ca;
-                  std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> ba;
-                  int group = 0; };
-    std::vector<Ctrl> ctrls;
-    juce::TooltipWindow tips { this, 500 };
-
-    static constexpr int kGroups = 4;
-    const char* groupNames[kGroups] { "Grain", "Wavelet / Codec", "Amp / Filter", "Output" };
-    int groupX[kGroups] { 0,0,0,0 }, groupY = 0;
+#if JUCE_MAC
+    std::unique_ptr<wgui::DropOverlay> overlay_;
+    juce::ComponentPeer* overlayPeer_ = nullptr;
+#endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveGrainEditor)
 };

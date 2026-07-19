@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- WaveGrain II default layout — amber-gold on brown-black "laboratory
+     instrument" fascia. The hero is the sample/grain-cloud view; controls form
+     an instrument fascia around it. Stealth-beta: no title text anywhere,
+     identity = sigil + accent + BETA tag. Editable in-plugin (WYSIWYG palette). -->
+<magic>
+  <Styles>
+    <Style name="default">
+      <Nodes/>
+      <Classes>
+        <col margin="3" padding="6" border="0" radius="8" background-color="FF201810"
+             flex-direction="column" caption-size="13" caption-color="FFB2A68F"
+             caption-placement="centred-top"/>
+        <hdr margin="0" padding="2" border="0" background-color="00000000"/>
+        <modstrip margin="3" padding="4" border="0" radius="8" background-color="FF1A130C"
+                  caption-size="11" caption-color="FF7A5E28" caption-placement="centred-top"/>
+        <knob caption-size="12" caption-color="FFB2A68F" caption-placement="centred-top"/>
+        <mini caption-size="10" caption-color="FF8F8471" caption-placement="centred-top"
+              slider-textbox="no-textbox"/>
+        <chiprow margin="0" padding="1" border="0" background-color="00000000"
+                 flex-direction="row"/>
+      </Classes>
+      <Types>
+        <Slider border="0" slider-type="rotary" slider-textbox="textbox-below"
+                lookAndFeel="LnfV2" background-color="00000000"/>
+        <ToggleButton border="0" caption-size="0" lookAndFeel="LnfV2"/>
+        <TextButton border="0" caption-size="0" lookAndFeel="LnfV2"/>
+        <ComboBox border="0" max-height="44" caption-size="11" lookAndFeel="LnfV2"/>
+        <SyncKnob border="0" caption-size="12" caption-color="FFB2A68F"
+                  caption-placement="centred-top"/>
+        <ModKnob border="0" caption-size="12" caption-color="FFB2A68F"
+                 caption-placement="centred-top"/>
+        <Meter border="0"/>
+      </Types>
+      <Palettes>
+        <default/>
+      </Palettes>
+    </Style>
+  </Styles>
+
+  <View id="root" resizable="1" resize-corner="1" width="1180" height="760"
+        min-width="960" min-height="620" flex-direction="column" padding="6"
+        background-color="FF15100A">
+
+    <!-- ── header: sigil + presets + status + output level ─────────────── -->
+    <View class="hdr" max-height="42" flex-direction="row">
+      <Sigil width="130" max-width="130" tooltip="beta build"/>
+      <PresetBar max-width="330" min-width="240"
+                 tooltip="Factory + user presets (saved under ~/Music)"/>
+      <View class="hdr"/>
+      <Status width="200" max-width="200"/>
+      <Meter source="output" max-width="90" tooltip="Output level"/>
+    </View>
+
+    <!-- ── hero: waveform + live grain cloud ───────────────────────────── -->
+    <SampleView flex-grow="1.4" min-height="170"
+                tooltip="Sample overview. Dots = live grains (x: source position, y: pan). Click or drag to set the grain Position. Drop an audio file anywhere to load it."/>
+
+    <!-- ── modulation strip: LFO A/B depth per destination ─────────────── -->
+    <View class="modstrip" caption="modulation depth — ring dot shows the live LFO" max-height="96" flex-direction="row">
+      <Slider caption="rate A" class="mini" parameter="rateModA" tooltip="LFO A depth on grain rate (multiplicative, +/- 2 octaves)"/>
+      <Slider caption="rate B" class="mini" parameter="rateModB" tooltip="LFO B depth on grain rate"/>
+      <Slider caption="size A" class="mini" parameter="sizeModA" tooltip="LFO A depth on grain size"/>
+      <Slider caption="size B" class="mini" parameter="sizeModB" tooltip="LFO B depth on grain size"/>
+      <Slider caption="pos A" class="mini" parameter="posModA" tooltip="LFO A depth on sample position"/>
+      <Slider caption="pos B" class="mini" parameter="posModB" tooltip="LFO B depth on sample position"/>
+      <Slider caption="pspr A" class="mini" parameter="pspreadModA" tooltip="LFO A depth on pitch spread"/>
+      <Slider caption="pspr B" class="mini" parameter="pspreadModB" tooltip="LFO B depth on pitch spread"/>
+      <Slider caption="comp A" class="mini" parameter="compModA" tooltip="LFO A depth on wavelet compression"/>
+      <Slider caption="comp B" class="mini" parameter="compModB" tooltip="LFO B depth on wavelet compression"/>
+      <Slider caption="tilt A" class="mini" parameter="tiltModA" tooltip="LFO A depth on scale tilt"/>
+      <Slider caption="tilt B" class="mini" parameter="tiltModB" tooltip="LFO B depth on scale tilt"/>
+      <Slider caption="sprd A" class="mini" parameter="spreadModA" tooltip="LFO A depth on stereo spread"/>
+      <Slider caption="sprd B" class="mini" parameter="spreadModB" tooltip="LFO B depth on stereo spread"/>
+    </View>
+
+    <!-- ── fascia: five instrument columns ─────────────────────────────── -->
+    <View flex-grow="2.4" flex-direction="row">
+
+      <View class="col" caption="source">
+        <ComboBox parameter="sample" caption="sample" tooltip="Built-in ROM or a user file (drop audio anywhere)"/>
+        <Slider caption="root" parameter="root" tooltip="MIDI note that plays the sample at original pitch"/>
+        <ModKnob caption="position" parameter="position" mod-a="posModA" mod-b="posModB"
+                 tooltip="Playhead position in the sample"/>
+        <Slider caption="scan" parameter="scan" tooltip="Playhead scan rate through the sample"/>
+        <Slider caption="spray" parameter="spray" tooltip="Random position/time jitter per grain"/>
+        <View class="chiprow" max-height="26">
+          <ToggleButton parameter="freeze" text="freeze" tooltip="Hold the playhead — the grain cloud loops in place"/>
+        </View>
+        <ComboBox parameter="window" caption="window" tooltip="Grain amplitude window"/>
+      </View>
+
+      <View class="col" caption="grain clock">
+        <SyncKnob caption="rate" base="rate" mod-a="rateModA" mod-b="rateModB"
+                  tooltip="Grain spawn interval — free ms or beat-synced (chip toggles)"/>
+        <SyncKnob caption="size" base="size" mod-a="sizeModA" mod-b="sizeModB"
+                  tooltip="Grain length — free ms or beat-synced (snapped to a power-of-two frame)"/>
+        <Slider caption="fine" parameter="pitchFine" tooltip="Fine pitch offset (octaves shown as semitones)"/>
+        <ModKnob caption="pitch spread" parameter="pitchSpread" mod-a="pspreadModA" mod-b="pspreadModB"
+                 tooltip="Random per-grain pitch offset range in semitones"/>
+        <Slider caption="reverse" parameter="reverseProb" tooltip="Probability a grain plays reversed"/>
+        <ModKnob caption="stereo" parameter="spread" mod-a="spreadModA" mod-b="spreadModB"
+                 tooltip="Random per-grain pan spread"/>
+      </View>
+
+      <View class="col" caption="wavelet">
+        <ComboBox parameter="wavelet" caption="family" tooltip="DWT family used for per-grain ops and the ROM codec"/>
+        <ModKnob caption="compress" parameter="compress" mod-a="compModA" mod-b="compModB"
+                 tooltip="Top-K wavelet compression per grain"/>
+        <ModKnob caption="tilt" parameter="tilt" mod-a="tiltModA" mod-b="tiltModB"
+                 tooltip="Per-octave spectral tilt in the wavelet domain"/>
+        <Slider caption="band lo" parameter="bandLow" tooltip="Lowest kept wavelet band"/>
+        <Slider caption="band hi" parameter="bandHigh" tooltip="Highest kept wavelet band"/>
+        <Slider caption="octave" parameter="octave" tooltip="DWT octave scale-shift per grain"/>
+        <CodecPanel min-height="86" caption="rom codec"
+                    tooltip="Wavelet-compress the whole sample once and play from the degraded ROM"/>
+      </View>
+
+      <View class="col" caption="lfo">
+        <View class="hdr" flex-direction="row" max-height="46">
+          <ComboBox parameter="lfoAShape" caption="A shape" tooltip="LFO A waveform"/>
+          <ComboBox parameter="lfoARetrig" caption="A retrig" tooltip="Free-running, key-retriggered, or transport-locked"/>
+        </View>
+        <View class="hdr" flex-direction="row">
+          <SyncKnob caption="A rate" base="lfoARate" tooltip="LFO A rate — free ms or beat-synced"/>
+          <Slider caption="A phase" parameter="lfoAPhase" tooltip="LFO A phase offset"/>
+        </View>
+        <View class="chiprow" max-height="24">
+          <ToggleButton parameter="lfoABipolar" text="bipolar" tooltip="Bipolar (+/-) or unipolar (0..1) output"/>
+        </View>
+        <View class="hdr" flex-direction="row" max-height="46">
+          <ComboBox parameter="lfoBShape" caption="B shape" tooltip="LFO B waveform"/>
+          <ComboBox parameter="lfoBRetrig" caption="B retrig" tooltip="Free-running, key-retriggered, or transport-locked"/>
+        </View>
+        <View class="hdr" flex-direction="row">
+          <SyncKnob caption="B rate" base="lfoBRate" tooltip="LFO B rate — free ms or beat-synced"/>
+          <Slider caption="B phase" parameter="lfoBPhase" tooltip="LFO B phase offset"/>
+        </View>
+        <View class="chiprow" max-height="24">
+          <ToggleButton parameter="lfoBBipolar" text="bipolar" tooltip="Bipolar (+/-) or unipolar (0..1) output"/>
+        </View>
+      </View>
+
+      <View class="col" caption="envelope / out">
+        <View class="hdr" flex-direction="row">
+          <Slider caption="attack" parameter="attack" tooltip="Amp envelope attack"/>
+          <Slider caption="decay" parameter="decay" tooltip="Amp envelope decay"/>
+        </View>
+        <View class="hdr" flex-direction="row">
+          <Slider caption="sustain" parameter="sustain" tooltip="Amp envelope sustain level"/>
+          <Slider caption="release" parameter="release" tooltip="Amp envelope release"/>
+        </View>
+        <View class="hdr" flex-direction="row">
+          <Slider caption="cutoff" parameter="cutoffHz" tooltip="Low-pass filter cutoff"/>
+          <Slider caption="reso" parameter="reso" tooltip="Filter resonance"/>
+        </View>
+        <View class="hdr" flex-direction="row">
+          <Slider caption="output" parameter="output" tooltip="Output gain (soft-limited)"/>
+          <Slider caption="voices" parameter="voices" tooltip="Polyphony"/>
+        </View>
+        <SeedPanel min-height="56" max-height="64" caption="seed"
+                   tooltip="Grain randomness policy: Fixed seed, Per-Key character, or a fresh Random seed each strike (lock a good roll)"/>
+      </View>
+    </View>
+
+    <!-- ── keyboard ────────────────────────────────────────────────────── -->
+    <KeyboardComponent max-height="64" key-width="18"
+                       tooltip="On-screen keyboard — plays the granular engine"/>
+  </View>
+</magic>
