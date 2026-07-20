@@ -7,8 +7,10 @@
 // =============================================================================
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <atomic>
+#include <cstdint>
 #include <cmath>
 #include <memory>
 #include <vector>
@@ -36,7 +38,7 @@ public:
     void setUserSample(SampleData s)
     {
         auto owned = std::make_shared<const SampleData>(std::move(s));
-        retired_ = userOwner_;                 // keep prior buffer one load deep
+        retireForAudio(userOwner_);            // park until audio provably past it
         userOwner_ = owned;
         userLive_.store(owned.get(), std::memory_order_release);
     }
@@ -50,7 +52,7 @@ public:
     void setCodedSample(SampleData s)
     {
         auto owned = std::make_shared<const SampleData>(std::move(s));
-        codedRetired_ = codedOwner_; codedOwner_ = owned;
+        retireForAudio(codedOwner_); codedOwner_ = owned;
         codedLive_.store(owned.get(), std::memory_order_release);
     }
 
@@ -92,6 +94,7 @@ public:
 
     void renderBlock(float* L, float* R, int n)
     {
+        blockEpoch_.fetch_add(1, std::memory_order_relaxed);   // coarse clock for retireForAudio
         const SampleData* smp = audioSample();
         for (int i = 0; i < n; ++i) { if (L) L[i] = 0.0f; if (R) R[i] = 0.0f; }
         for (auto& v : voices) if (v.isActive()) v.renderBlock(smp, L, R, n);
@@ -163,10 +166,28 @@ private:
     double sr = 48000.0;
     WaveGrainParams params_;
     std::array<SampleData, 4> roms_;
-    std::shared_ptr<const SampleData> userOwner_, retired_;
+    std::shared_ptr<const SampleData> userOwner_;
     std::atomic<const SampleData*> userLive_ { nullptr };
-    std::shared_ptr<const SampleData> codedOwner_, codedRetired_;   // ROM-codec output
+    std::shared_ptr<const SampleData> codedOwner_;                  // ROM-codec output
     std::atomic<const SampleData*> codedLive_ { nullptr };
+
+    // Message thread: park a just-replaced sample until the audio thread has
+    // provably moved past any raw pointer to it. renderBlock() bumps blockEpoch_
+    // at block start and re-loads the live pointer each block, so an entry
+    // retired at epoch e can still be read during blocks e and e+1; it is free
+    // only once the observed epoch reaches e+2. This makes retirement safe for
+    // any number of publishes inside one audio block (was: depth-1 slot).
+    struct RetiredSample { std::uint64_t epoch; std::shared_ptr<const SampleData> ptr; };
+    void retireForAudio(const std::shared_ptr<const SampleData>& old)
+    {
+        const std::uint64_t now = blockEpoch_.load(std::memory_order_relaxed);
+        retired_.erase(std::remove_if(retired_.begin(), retired_.end(),
+                       [now](const RetiredSample& r) { return r.epoch + 2 <= now; }),
+                       retired_.end());
+        if (old != nullptr) retired_.push_back({ now, old });
+    }
+    std::vector<RetiredSample> retired_;
+    std::atomic<std::uint64_t> blockEpoch_ { 0 };
 
     std::array<GrainVoice, kMaxVoices> voices;
     double bend_ = 0.0; int lastVoice_ = -1;

@@ -103,7 +103,10 @@
             {
                 if (error != nil || fileURL == nil || !fileCb) return;
                 juce::String path = juce::String::fromUTF8([[fileURL path] UTF8String]);
-                juce::MessageManager::callAsync([fileCb, path] { fileCb(path); });
+                // Promise files are our own temp copies: the callback loads the
+                // sample into memory synchronously, so delete the copy after it
+                // returns (real user files take the NSURL branch and are kept).
+                juce::MessageManager::callAsync([fileCb, path] { fileCb(path); juce::File(path).deleteFile(); });
             }];
             handledAnything = true;
         }
