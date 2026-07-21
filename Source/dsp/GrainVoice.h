@@ -97,6 +97,11 @@ public:
     {
         if (!active) return;
         sample = smp;
+        // Density normalization: a Hann OLA at overlap R=N/hop sums to ~R/2, so scale
+        // by 2*hop/N to keep level independent of grain density (fixes the v2 regression
+        // where low overlap was both quieter and amplitude-rippling).
+        const double effHop  = std::min(std::max(32.0, p_.hopSamples), (double) curN * 0.5);
+        const double olaGain = 2.0 * effHop / (double) std::max(1, curN);
         for (int s = 0; s < n; ++s)
         {
             if (stage != Idle && sample && sample->length > 0 && env > 1.0e-5)
@@ -117,6 +122,7 @@ public:
                     l += v * g.panL; r += v * g.panR;
                     if (++g.writeIndex >= g.len) g.active = false;
                 }
+            l *= olaGain; r *= olaGain;              // density-normalized OLA level
 
             advanceEnv();
             const double fc = 20.0 + p_.cutoff * (sr * 0.45 - 20.0);
@@ -177,6 +183,7 @@ private:
     int nextHop()
     {
         double hop = std::max(32.0, p_.hopSamples);
+        hop = std::min(hop, (double) curN * 0.5);   // overlap floor >=2x (Hann COLA): no gaps / sub-COLA thinning
         // Always jitter the spawn time (baseline 4% + Spray) so the grain RATE never
         // forms an audible spectral line — otherwise periodic grains impose their own
         // pitch. Smears the grain-rate artifact, leaving the sample's pitch dominant.

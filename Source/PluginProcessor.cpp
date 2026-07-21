@@ -87,7 +87,7 @@ APVTS::ParameterLayout WaveGrainProcessor::createLayout()
     c1(pid::sample, "Sample", { "Pluck","Vowel","Hit","Pad","User" }, 0);
     p.push_back(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{pid::root,1}, "Root Note", 24, 84, 60, noteAttr));
     b2(pid::rateSync, "Grain Rate Sync", false);
-    f2(pid::rateMs,  "Grain Rate",  { 2.0f, 500.0f, 0.0f, 0.35f }, 12.0f, msAttr());
+    f2(pid::rateMs,  "Grain Rate",  { 2.0f, 500.0f, 0.0f, 0.35f }, 8.0f, msAttr());   // fuller default overlap (was 12)
     c2(pid::rateDiv, "Grain Rate Div", divisionLabels(), 2);            // 1/16
     b2(pid::sizeSync, "Grain Size Sync", false);
     f2(pid::sizeMs,  "Grain Size",  { 4.0f, 120.0f, 0.0f, 0.5f }, 21.0f, msAttr());
@@ -114,7 +114,7 @@ APVTS::ParameterLayout WaveGrainProcessor::createLayout()
     in1(pid::romBits, "ROM Bits", 2, 16, 12);
 
     // ---- seed policy ----
-    c2(pid::seedMode, "Seed Mode", { "Fixed","Per-Key","Random" }, 0);
+    c2(pid::seedMode, "Seed Mode", { "Fixed","Per-Key","Random" }, 1);   // Per-Key: chord voices decorrelate (was Fixed)
     in2(pid::seed, "Seed", 1, 999999, 1234);
 
     // ---- LFO A/B ----

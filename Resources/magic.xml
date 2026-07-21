@@ -22,7 +22,7 @@
                  flex-direction="row"/>
       </Classes>
       <Types>
-        <Slider border="0" slider-type="rotary" slider-textbox="textbox-below"
+        <Slider border="0" slider-type="rotary-horizontal-vertical" slider-textbox="textbox-below"
                 lookAndFeel="LnfV2" background-color="00000000"/>
         <ToggleButton border="0" caption-size="0" lookAndFeel="LnfV2"/>
         <TextButton border="0" caption-size="0" lookAndFeel="LnfV2"/>
