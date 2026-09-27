@@ -15,6 +15,13 @@ namespace
     const th::Palette& pal() { return th::kWaveGrain; }
     constexpr const char* kAudioWildcards = "*.wav;*.aif;*.aiff;*.flac;*.ogg;*.mp3;*.m4a;*.caf";
 
+    // String::matchesWildcard takes one pattern, not a list: the filter splits it.
+    bool isAudioFile(const juce::String& path)
+    {
+        static const juce::WildcardFileFilter filter(kAudioWildcards, {}, "audio");
+        return filter.isFileSuitable(juce::File::createFileWithoutCheckingPath(path));
+    }
+
     WaveGrainProcessor* processorOf(foleys::MagicGUIBuilder& b)
     {
         return dynamic_cast<WaveGrainProcessor*>(b.getMagicState().getProcessor());
@@ -301,7 +308,7 @@ private:
     WaveGrainProcessor* proc;
     juce::String base_, modAId_, modBId_;
     juce::Slider msSlider, divSlider;
-    juce::TextButton chip { "ms" };
+    juce::ToggleButton chip { "ms" };   // ToggleButton so LnfV2 draws it as a chip
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> msAtt, divAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> chipAtt;
     std::unique_ptr<acv2::ui::ModRing> ringA, ringB;
@@ -462,6 +469,9 @@ public:
         if (proc != nullptr)
         {
             auto& st = proc->state();
+            // the attachment only selects an item: the box has to be filled first
+            if (auto* choice = dynamic_cast<juce::AudioParameterChoice*>(st.getParameter(pid::seedMode)))
+                mode.addItemList(choice->choices, 1);
             modeAtt = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(st, pid::seedMode, mode);
             seedAtt = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(st, pid::seed, seedSlider);
             st.addParameterListener(pid::seedMode, this);
@@ -601,7 +611,7 @@ private:
     }
 
     WaveGrainProcessor* proc;
-    juce::TextButton on { "codec off" };
+    juce::ToggleButton on { "codec off" };   // ToggleButton so LnfV2 draws it as a chip
     juce::Slider ratio, bits;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> onAtt;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAtt, bitsAtt;
@@ -804,7 +814,7 @@ void WaveGrainEditor::parentHierarchyChanged()
         {
             if (sp == nullptr) return;
             juce::File f(path);
-            if (f.existsAsFile() && f.getFileName().matchesWildcard(kAudioWildcards, true))
+            if (f.existsAsFile() && isAudioFile(path))
                 sp->proc.loadUserSample(f);
         };
         cbs.onHighlight = [sp = juce::Component::SafePointer<WaveGrainEditor>(this)](bool over)
@@ -819,7 +829,7 @@ void WaveGrainEditor::parentHierarchyChanged()
 bool WaveGrainEditor::isInterestedInFileDrag(const juce::StringArray& files)
 {
     for (auto& f : files)
-        if (f.matchesWildcard(kAudioWildcards, true)) return true;
+        if (isAudioFile(f)) return true;
     return false;
 }
 

@@ -372,7 +372,7 @@ void WaveGrainProcessor::initialiseBuilder(foleys::MagicGUIBuilder& builder)
 
 juce::ValueTree WaveGrainProcessor::createGuiValueTree()
 {
-    juce::String xml(BinaryData::magic_xml, (size_t) BinaryData::magic_xmlSize);
+    const auto xml = juce::String::fromUTF8(BinaryData::magic_xml, BinaryData::magic_xmlSize);
     auto tree = juce::ValueTree::fromXml(xml);
     if (tree.isValid()) return tree;
     return foleys::MagicProcessor::createGuiValueTree();
