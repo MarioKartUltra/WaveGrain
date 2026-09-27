@@ -31,7 +31,7 @@ endif()
 # ---- build switches ---------------------------------------------------------
 # GUI_EDITOR OFF = no foleys WYSIWYG window next to the plugin (builds to hand out).
 # INSTALL_AFTER_BUILD OFF = leave the bundles in the build dir, touch no plugin folder.
-option(WAVEGRAIN_GUI_EDITOR "Open the foleys WYSIWYG editor window with the plugin" ON)
+option(WAVEGRAIN_GUI_EDITOR "Open the foleys WYSIWYG editor window with the plugin" OFF)
 option(WAVEGRAIN_INSTALL_AFTER_BUILD "Copy the built plugins into ~/Library/Audio/Plug-Ins" ON)
 
 # ---- plugin target: v2 identity so v1 and v2 coexist in a DAW ---------------
