@@ -73,7 +73,7 @@ static bool identical(const std::vector<float>& a, const std::vector<float>& b)
 static void tempoSyncTests()
 {
     using namespace acv2::tempo;
-    check(kNumDivisions == 16, "division table frozen at 16");
+    check(kNumDivisions == 21, "the first 16 divisions are frozen; 21 in all");
     check(std::fabs(divisionToMs(8, 120.0) - 500.0) < 1e-9, "1/4 @ 120bpm = 500 ms");
     check(std::fabs(divisionToMs(5, 120.0) - 250.0) < 1e-9, "1/8 @ 120bpm = 250 ms");
     check(std::fabs(divisionToMs(10, 120.0) - 750.0) < 1e-9, "1/4. dotted = 750 ms");
@@ -81,10 +81,15 @@ static void tempoSyncTests()
     check(std::fabs(divisionToMs(15, 60.0) - 16000.0) < 1e-9, "4/1 @ 60bpm = 16 s");
     check(indexOfLabel("1/4") == 8 && indexOfLabel("1/16T") == 1, "label lookup");
     check(std::fabs(msToHz(250.0) - 4.0) < 1e-12, "msToHz");
-    // monotonic non-decreasing durations across the frozen list
+    // the frozen first 16 are in duration order; the appended ones are reached
+    // through familyOrder(), which sorts the whole table by duration
     bool mono = true;
-    for (int i = 1; i < kNumDivisions; ++i) if (wholeNotes(i) < wholeNotes(i - 1)) mono = false;
-    check(mono, "division durations monotonic");
+    for (int i = 1; i < 16; ++i) if (wholeNotes(i) < wholeNotes(i - 1)) mono = false;
+    check(mono, "frozen division durations monotonic");
+    int order[64]; const int n = familyOrder(Family::All, order, 64);
+    bool sorted = n == kNumDivisions;
+    for (int k = 1; k < n; ++k) if (wholeNotes(order[k]) <= wholeNotes(order[k - 1])) sorted = false;
+    check(sorted, "familyOrder(All) walks every division in duration order");
     check(acv2::units::msToText(500.0) == "500 ms" && acv2::units::msToText(1500.0) == "1.50 s", "units ms text");
 }
 
