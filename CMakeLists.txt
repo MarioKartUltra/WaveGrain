@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 Abraham Joseph Okayli Masaryk
 cmake_minimum_required(VERSION 3.22)
-project(WaveGrain VERSION 2.0.0 LANGUAGES C CXX OBJC OBJCXX)
+project(WaveGrain VERSION 2.0.1 LANGUAGES C CXX OBJC OBJCXX)
 
 # foleys_gui_magic requires C++20 (v2 convention).
 set(CMAKE_CXX_STANDARD 20)
