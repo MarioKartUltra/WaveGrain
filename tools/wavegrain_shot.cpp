@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Abraham Joseph Okayli Masaryk
 // =============================================================================
 //  wavegrain_shot — offscreen UI screenshot tool for WaveGrain II.
 //  Links the plugin shared-code target, constructs the processor + editor,
@@ -234,12 +236,12 @@ int testFileDrop (juce::AudioProcessorEditor& ed)
         ++bad;
         std::printf ("  FAIL '%s' should be %s\n", path, wanted ? "accepted" : "refused");
     };
-    expect ("/Users/someone/Samples/kick.wav",   true);
-    expect ("/Users/someone/Samples/LOOP.AIFF",  true);
-    expect ("/Users/someone/Samples/pad.flac",   true);
-    expect ("/Users/someone/Samples/vox.m4a",    true);
-    expect ("/Users/someone/Samples/notes.txt",  false);
-    expect ("/Users/someone/Samples/wav",        false);
+    expect ("/Volumes/Samples/Samples/kick.wav",   true);
+    expect ("/Volumes/Samples/Samples/LOOP.AIFF",  true);
+    expect ("/Volumes/Samples/Samples/pad.flac",   true);
+    expect ("/Volumes/Samples/Samples/vox.m4a",    true);
+    expect ("/Volumes/Samples/Samples/notes.txt",  false);
+    expect ("/Volumes/Samples/Samples/wav",        false);
     std::printf ("  [file drop] %d failures\n", bad);
     return bad;
 }
@@ -292,8 +294,7 @@ int main (int argc, char** argv)
 
     const juce::String outPath = (argc > 1)
         ? juce::String (juce::CharPointer_UTF8 (argv[1]))
-        : juce::String ("/private/tmp/claude-501/-Users-amasaryk-projects/"
-                        "fc9277dc-03c0-456c-8d90-535220843ea7/scratchpad/shots/WaveGrain");
+        : juce::File::getCurrentWorkingDirectory().getChildFile ("shots").getFullPathName();   // default: ./shots under the current directory
 
     juce::ScopedJuceInitialiser_GUI juceInit;
 

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Abraham Joseph Okayli Masaryk
 // =============================================================================
 //  WaveGrain II — DropOverlay.h
 //  Native macOS NSDraggingDestination overlay for the plugin editor. JUCE's

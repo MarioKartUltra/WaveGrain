@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Abraham Joseph Okayli Masaryk
 // WaveGrain II — offline JUCE-free check.
 // v1 suite: DWT PR + per-ROM render/pitch + compression + grain cap + codec.
 // v2 additions: tempo-sync table math, LFO shape bounds/period/determinism,

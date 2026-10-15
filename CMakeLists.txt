@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Abraham Joseph Okayli Masaryk
 cmake_minimum_required(VERSION 3.22)
 project(WaveGrain VERSION 2.0.0 LANGUAGES C CXX OBJC OBJCXX)
 
@@ -9,24 +11,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 endif()
 
-if(DEFINED JUCE_DIR AND EXISTS "${JUCE_DIR}/CMakeLists.txt")
-    add_subdirectory("${JUCE_DIR}" "${CMAKE_BINARY_DIR}/JUCE")
-elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/JUCE/CMakeLists.txt")
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/JUCE" "${CMAKE_BINARY_DIR}/JUCE")
-elseif(EXISTS "$ENV{HOME}/projects/JUCE/CMakeLists.txt")
-    add_subdirectory("$ENV{HOME}/projects/JUCE" "${CMAKE_BINARY_DIR}/JUCE")
-else()
-    message(FATAL_ERROR "No local JUCE found — set -DJUCE_DIR=/path/to/JUCE")
-endif()
+# JUCE and foleys_gui_magic: a local checkout, else fetched (cmake/ThirdParty.cmake)
+include(cmake/ThirdParty.cmake)
 
-# ---- foleys_gui_magic (WYSIWYG GUI layer, v2) --------------------------------
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/foleys_gui_magic/modules/foleys_gui_magic")
-    juce_add_module("${CMAKE_CURRENT_SOURCE_DIR}/external/foleys_gui_magic/modules/foleys_gui_magic")
-elseif(EXISTS "$ENV{HOME}/projects/foleys_gui_magic/modules/foleys_gui_magic")
-    juce_add_module("$ENV{HOME}/projects/foleys_gui_magic/modules/foleys_gui_magic")
-else()
-    message(FATAL_ERROR "foleys_gui_magic not found — symlink external/foleys_gui_magic")
-endif()
 
 # ---- build switches ---------------------------------------------------------
 # GUI_EDITOR OFF = no foleys WYSIWYG window next to the plugin (builds to hand out).

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Abraham Joseph Okayli Masaryk
 // =============================================================================
 //  WaveGrain II — Params.h   (plain seam between JUCE and the DSP core)
 //  v2: explicit grain clock (hop in samples, host-side ms/beat-sync resolved

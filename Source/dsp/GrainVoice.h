@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Abraham Joseph Okayli Masaryk
 // =============================================================================
 //  WaveGrain II — GrainVoice.h
 //  One voice = one held MIDI note. Owns a playhead into the shared sample and a
