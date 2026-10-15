@@ -246,6 +246,16 @@ int testFileDrop (juce::AudioProcessorEditor& ed)
     return bad;
 }
 
+
+// The on-screen keyboard inside an editor (the layout's Keyboard item).
+static juce::MidiKeyboardComponent* findKeyboard (juce::Component& c)
+{
+    if (auto* k = dynamic_cast<juce::MidiKeyboardComponent*> (&c)) return k;
+    for (auto* child : c.getChildren())
+        if (auto* k = findKeyboard (*child)) return k;
+    return nullptr;
+}
+
 int runSelfTest()
 {
     WaveGrainProcessor proc;
@@ -257,6 +267,12 @@ int runSelfTest()
     pumpMs (900);
 
     WiringTest test { proc, {}, 0 };
+    // hosted (this harness is not a standalone app): the keyboard never takes keyboard focus
+    if (auto* keys = findKeyboard (*ed))
+    {
+        if (keys->getWantsKeyboardFocus()) { std::printf ("FAIL hosted, the on-screen keyboard takes keyboard focus\n"); ++test.failures; }
+    }
+    else { std::printf ("FAIL the layout has no on-screen keyboard\n"); ++test.failures; }
     test.failures += testFileDrop (*ed);
     test.run (*ed, "as opened");
 

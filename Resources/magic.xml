@@ -61,7 +61,7 @@
         <Meter border="0" margin="2" padding="0" background-color="00000000"
                bar-background-color="FF0F0B06" bar-fill-color="FFE9B44C"
                outline-color="FF3B301F" tickmark-color="FFB2A68F"/>
-        <KeyboardComponent border="0" margin="2" padding="0" background-color="00000000"/>
+        <Keyboard border="0" margin="2" padding="0" background-color="00000000"/>
       </Types>
       <Palettes>
         <default/>
@@ -215,7 +215,7 @@
     </View>
 
     <!-- ── keyboard ────────────────────────────────────────────────────── -->
-    <KeyboardComponent height="64" flex-grow="0" key-width="18"
+    <Keyboard height="64" flex-grow="0" key-width="18"
                        key-down-color="FFE9B44C" mouse-over-color="66E9B44C"
                        tooltip="On-screen keyboard: plays the granular engine"/>
   </View>

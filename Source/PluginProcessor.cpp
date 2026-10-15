@@ -7,6 +7,7 @@
 #include "PluginEditor.h"
 #include "dsp/Codec.h"
 #include "BinaryData.h"
+#include "common/acv2/ui/KeyboardItem.h"
 
 using APVTS = juce::AudioProcessorValueTreeState;
 using namespace wavegrain;
@@ -369,6 +370,7 @@ void WaveGrainProcessor::initialiseBuilder(foleys::MagicGUIBuilder& builder)
 {
     builder.registerJUCEFactories();
     builder.registerJUCELookAndFeels();
+    builder.registerFactory ("Keyboard", &acv2::KeyboardItem::factory);   // focus-aware on-screen keyboard
     registerWaveGrainItems(builder);   // PluginEditor.h — custom GuiItems
 }
 
